@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -90,18 +91,19 @@ class Consume
         type = typeof(UnreachableException);
         type = typeof(DebuggerDisableUserUnhandledExceptionsAttribute);
 
-        KeyValuePair.Create("a", "b");
+        var (key, value) = KeyValuePair.Create("a", "b");
+
+#if NET6_0_OR_GREATER
+        var (date, time, offset) = DateTimeOffset.Now;
+        var (dateOnly, timeOnly) = DateTime.Now;
+        var (hour, minute) = new TimeOnly();
+#endif
+
+        var (year, month, day) = DateTime.Now;
+
         // Test to make sure there are no clashes in the Polyfill code with classes that
         // might be defined in user code. See comments in Debug.cs for more details.
         Debug.Log("Test log to make sure this is working");
-    }
-
-    #region Compiler Features
-    void DeconstructTupleInForeach(IEnumerable<KeyValuePair<string, string>> variables)
-    {
-        foreach (var (name, value) in variables)
-        {
-        }
     }
 
 #if FeatureValueTuple
@@ -183,8 +185,6 @@ class Consume
 
 #endif
 
-    #endregion
-
     void Byte_Methods()
     {
         BytePolyfill.TryParse("1", null, out _);
@@ -234,6 +234,26 @@ class Consume
         var value = dict.GetOrAdd("Hello", static (_, arg) => arg.Length, "World");
     }
 
+#if FeatureMemory
+    void String_Normalize()
+    {
+        var span = "Café".AsSpan();
+        var normalizedLength = span.GetNormalizedLength(NormalizationForm.FormC);
+        var isNormalized = span.IsNormalized(NormalizationForm.FormC);
+        Span<char> destination = new char[10];
+        var tryNormalize = span.TryNormalize(destination, out var chars, NormalizationForm.FormC);
+    }
+#endif
+
+#if NET9_0_OR_GREATER
+    void OrderedDictionary_Methods()
+    {
+        var dict = new OrderedDictionary<string, int>();
+        var result = dict.TryAdd("Hello", 1, out var index1);
+        result = dict.TryGetValue("Hello", out var value, out var index2);
+    }
+#endif
+
     void ConcurrentBag_Methods()
     {
         var bag = new ConcurrentBag<string>();
@@ -252,6 +272,12 @@ class Consume
         dictionary.GetValueOrDefault("key");
         dictionary.GetValueOrDefault("key", "default");
         dictionary.TryAdd("key", "value");
+        dictionary.Remove("key");
+
+        IDictionary<string, string?> iDictionary = dictionary;
+        iDictionary.TryAdd("key", "value");
+        iDictionary.TryAdd("key", "value");
+        iDictionary.Remove("key");
     }
 
     void Lock_Methods()
@@ -443,12 +469,14 @@ class Consume
         result = readOnlySpan.StartsWith('a');
         result = readOnlySpan.EndsWith('a');
         result = readOnlySpan.StartsWith("value", StringComparison.Ordinal);
+#if FeatureValueTuple
         var split = readOnlySpan.Split('a');
         split = readOnlySpan.Split("a".AsSpan());
 #if LangVersion13
         // ReSharper disable once RedundantExplicitParamsArrayCreation
         split = readOnlySpan.SplitAny(['a']);
         split = readOnlySpan.SplitAny("a".AsSpan());
+#endif
 #endif
     }
 
