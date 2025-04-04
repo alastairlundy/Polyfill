@@ -71,4 +71,32 @@ static partial class Polyfill
     }
 
 #endif
+
+#if NETCOREAPP2_0 || NETSTANDARD2_0 || NETFRAMEWORK
+
+    /// <summary>
+    /// Ensures that the capacity of this dictionary is at least the specified capacity. If the current capacity is less than capacity, it is increased to at least the specified capacity.
+    /// </summary>
+    //Link: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2.ensurecapacity
+    public static void EnsureCapacity<TKey, TValue>(this Dictionary<TKey, TValue> target, int capacity)
+    {
+    }
+
+    /// <summary>
+    /// Sets the capacity of this dictionary to hold up a specified number of entries without any further expansion of its backing storage.
+    /// </summary>
+    //Link: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2.trimexcess#system-collections-generic-dictionary-2-trimexcess(system-int32)
+    public static void TrimExcess<TKey, TValue>(this Dictionary<TKey, TValue> target, int capacity)
+    {
+    }
+
+    /// <summary>
+    /// Sets the capacity of this dictionary to what it would be if it had been originally initialized with all its entries.
+    /// </summary>
+    //Link: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2.ensurecapacity
+    public static void TrimExcess<TKey, TValue>(this Dictionary<TKey, TValue> target)
+    {
+    }
+
+#endif
 }
