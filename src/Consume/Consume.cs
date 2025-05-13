@@ -476,7 +476,17 @@ class Consume
         Span<byte> bufferSpan = new byte[10];
         random.NextBytes(bufferSpan);
         random.Shuffle(bufferSpan);
+
+        ReadOnlySpan<int> choicesSpan = [1, 2, 3, 4, 5];
+        Span<int> destination = new int[10];
+        random.GetItems(choicesSpan, destination);
+
+        var resultFromSpan = random.GetItems(choicesSpan, 10);
 #endif
+
+        int[] choicesArray = [1, 2, 3, 4, 5];
+        var resultFromArray = random.GetItems(choicesArray, 10);
+
         var bufferArray = new byte[10];
         random.Shuffle(bufferArray);
     }
@@ -620,6 +630,14 @@ class Consume
         split = "a b".Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
         var startsWith = "value".StartsWith('a');
     }
+    #if FeatureMemory
+    void DefaultInterpolatedStringHandler_Methods()
+    {
+        var handler = new DefaultInterpolatedStringHandler();
+        handler.AppendLiteral("value");
+        handler.Clear();
+    }
+    #endif
 
     void StringBuilder_Methods()
     {

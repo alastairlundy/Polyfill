@@ -133,5 +133,42 @@ static class EnumPolyfill
 #else
         Enum.TryParse<TEnum>(value.ToString(), ignoreCase, out result);
 #endif
+
+    /// <summary>
+    /// Tries to format the value of the enumerated type instance into the provided span of characters.
+    /// </summary>
+    //Link: https://learn.microsoft.com/en-us/dotnet/api/system.enum.tryformat
+    public static bool TryFormat<TEnum>(TEnum value, Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default)
+        where TEnum : struct, Enum
+    {
+#if NET8_0_OR_GREATER
+        return Enum.TryFormat<TEnum>(value, destination, out charsWritten, format);
+    #else
+        return TryFormatUnconstrained(value, destination, out charsWritten, format);
+#endif
+    }
+
+    internal static bool TryFormatUnconstrained(object value, Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default)
+    {
+        string result;
+        if (format.Length == 0)
+        {
+            result = value.ToString();
+        }
+        else
+        {
+            result = Enum.Format(value.GetType(), value, format.ToString());
+        }
+
+        if (result.Length > destination.Length)
+        {
+            charsWritten = 0;
+            return false;
+        }
+
+        charsWritten = result.Length;
+        result.CopyTo(destination);
+        return true;
+    }
 #endif
 }
