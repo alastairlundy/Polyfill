@@ -14,6 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 		mdsnippets.json = mdsnippets.json
 		..\readme.md = ..\readme.md
+		Polyfill\Polyfill.nuspec = Polyfill\Polyfill.nuspec
+		Polyfill\Polyfill.targets = Polyfill\Polyfill.targets
+		TestIncludes.targets = TestIncludes.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polyfill", "Polyfill\Polyfill.csproj", "{698FB675-3480-4107-8CAE-51452C6138CE}"
@@ -55,11 +58,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiBuilderTests", "ApiBuild
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeOnlyValueTuple", "ConsumeOnlyValueTuple\ConsumeOnlyValueTuple.csproj", "{2FE1429A-68B0-4C71-B1ED-D371C72DAD0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoExtras", "NoExtras\NoExtras.csproj", "{4F482296-D4BF-4E56-AF23-351CCEF1B96E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoExtrasTests", "NoExtrasTests\NoExtrasTests.csproj", "{4F482296-D4BF-4E56-AF23-351CCEF1B96E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeBclMemory", "ConsumeBclMemory\ConsumeBclMemory.csproj", "{A89A3ACD-3DC8-4321-AEBC-05DAF0DEC9E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeConsumeBclMemory", "ConsumeConsumeBclMemory\ConsumeConsumeBclMemory.csproj", "{E83A80D1-10E3-4CBE-942D-E671A04C93F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeOnlyCompression", "ConsumeOnlyCompression\ConsumeOnlyCompression.csproj", "{E8E46E75-763A-4031-8545-E67DFB768D1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumeNoOptional", "ConsumeNoOptional\ConsumeNoOptional.csproj", "{AD562B55-4340-4AFC-8FDE-78F3C87A5435}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolyfillLib", "PolyfillLib\PolyfillLib.csproj", "{FD2DAEE4-7931-4A3B-93E5-2FC5C3AE8D4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -149,6 +158,18 @@ Global
 		{E83A80D1-10E3-4CBE-942D-E671A04C93F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E83A80D1-10E3-4CBE-942D-E671A04C93F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E83A80D1-10E3-4CBE-942D-E671A04C93F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8E46E75-763A-4031-8545-E67DFB768D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8E46E75-763A-4031-8545-E67DFB768D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8E46E75-763A-4031-8545-E67DFB768D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8E46E75-763A-4031-8545-E67DFB768D1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD562B55-4340-4AFC-8FDE-78F3C87A5435}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD562B55-4340-4AFC-8FDE-78F3C87A5435}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD562B55-4340-4AFC-8FDE-78F3C87A5435}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD562B55-4340-4AFC-8FDE-78F3C87A5435}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD2DAEE4-7931-4A3B-93E5-2FC5C3AE8D4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD2DAEE4-7931-4A3B-93E5-2FC5C3AE8D4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD2DAEE4-7931-4A3B-93E5-2FC5C3AE8D4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD2DAEE4-7931-4A3B-93E5-2FC5C3AE8D4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

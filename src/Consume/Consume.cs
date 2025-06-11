@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -68,8 +69,10 @@ class Consume
         // type = typeof(TupleElementNamesAttribute);
         type = typeof(DebuggerNonUserCodeAttribute);
         type = typeof(UnscopedRefAttribute);
+#if !NoStringInterpolation
         type = typeof(InterpolatedStringHandlerArgumentAttribute);
         type = typeof(InterpolatedStringHandlerAttribute);
+#endif
         type = typeof(StringSyntaxAttribute);
         type = typeof(DynamicallyAccessedMembersAttribute);
         type = typeof(DynamicDependencyAttribute);
@@ -82,12 +85,15 @@ class Consume
 #endif
         //TODO:
         //type = typeof(AsyncMethodBuilderAttribute);
+#if !NET6_0 && !NET5_0
         type = typeof(ObsoletedOSPlatformAttribute);
-        type = typeof(SupportedOSPlatformAttribute);
         type = typeof(SupportedOSPlatformGuardAttribute);
+        type = typeof(UnsupportedOSPlatformGuardAttribute);
+#endif
+        type = typeof(OSPlatformAttribute);
+        type = typeof(SupportedOSPlatformAttribute);
         type = typeof(TargetPlatformAttribute);
         type = typeof(UnsupportedOSPlatformAttribute);
-        type = typeof(UnsupportedOSPlatformGuardAttribute);
         type = typeof(StackTraceHiddenAttribute);
         type = typeof(UnmanagedCallersOnlyAttribute);
         type = typeof(SuppressGCTransitionAttribute);
@@ -105,10 +111,6 @@ class Consume
 #endif
 
         var (year, month, day) = DateTime.Now;
-
-        // Test to make sure there are no clashes in the Polyfill code with classes that
-        // might be defined in user code. See comments in Debug.cs for more details.
-        Debug.Log("Test log to make sure this is working");
     }
 
 #if FeatureValueTuple
@@ -363,7 +365,12 @@ class Consume
         var minBy = enumerable.MinBy(_ => _);
         var distinctBy = enumerable.DistinctBy(_ => _);
         var skipLast = enumerable.SkipLast(1);
+        int[] numbers = [1, 2, 3, 4];
+        string[] words = ["one", "two", "three"];
+        var numbersAndWords = numbers.Zip(words, (first, second) => first + " " + second);
 #if FeatureValueTuple
+        var elementAt = enumerable.ElementAt(new Index(1));
+
         var take = enumerable.Take(1..3);
 #endif
         var takeLast = enumerable.TakeLast(3);
@@ -630,7 +637,8 @@ class Consume
         split = "a b".Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
         var startsWith = "value".StartsWith('a');
     }
-    #if FeatureMemory
+
+    #if !NoStringInterpolation && FeatureMemory
     void DefaultInterpolatedStringHandler_Methods()
     {
         var handler = new DefaultInterpolatedStringHandler();
@@ -751,4 +759,19 @@ class Consume
         document.SaveAsync(new StringWriter(), SaveOptions.None, CancellationToken.None);
         document.SaveAsync(new MemoryStream(), SaveOptions.None, CancellationToken.None);
     }
+
+#if FeatureCompression
+    void ZipArchiveEntry_Methods(ZipArchive zip, ZipArchiveEntry entry)
+    {
+        entry.OpenAsync();
+        zip.CreateEntryFromFile("file.txt", "entry.txt");
+        zip.CreateEntryFromFile("file.txt", "entry.txt", CompressionLevel.Optimal);
+        zip.CreateEntryFromFileAsync("file.txt", "entry.txt");
+        zip.CreateEntryFromFileAsync("file.txt", "entry.txt", CompressionLevel.Optimal);
+        zip.ExtractToDirectory("destinationPath", true);
+        zip.ExtractToDirectoryAsync("destinationPath", true);
+        entry.ExtractToFile("destinationPath", true);
+        entry.ExtractToFileAsync("destinationPath", true);
+    }
+#endif
 }
