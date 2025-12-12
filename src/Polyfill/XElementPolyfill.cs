@@ -12,8 +12,18 @@ using System.Xml;
 using System;
 using System.IO;
 using System.Xml.Linq;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
-static partial class Polyfill
+[ExcludeFromCodeCoverage]
+[DebuggerNonUserCode]
+#if PolyUseEmbeddedAttribute
+[global::Microsoft.CodeAnalysis.EmbeddedAttribute]
+#endif
+#if PolyPublic
+public
+#endif
+static partial class XElementPolyfill
 {
     extension(XElement)
     {

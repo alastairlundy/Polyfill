@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
 
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
