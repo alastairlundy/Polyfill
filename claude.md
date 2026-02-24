@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Polyfill is a **source-only** NuGet package that exposes newer .NET and C# features to older runtimes. It ships as C# source files (not compiled assemblies) that get compiled directly into consuming projects. There are 723+ polyfilled APIs. A compiled library variant exists as `PolyfillLib`.
 
-Targets `netstandard2.0` and supports: `net461`–`net481`, `netcoreapp2.0`–`3.1`, `net5.0`–`net10.0`, `uap10`.
+Targets `netstandard2.0` and supports: `net461`–`net481`, `netcoreapp2.0`–`3.1`, `net5.0`–`net11.0`, `uap10`.
 
 ## Build Commands
 
@@ -59,6 +59,11 @@ Polyfill uses extensive `#if` directives. Key constants:
 - **Static helper polyfills**: `{TypeName}Polyfill.cs` (e.g., `EnumPolyfill.cs`)
 - **Optional feature groups**: `Ensure/`, `Guard/`, `Nullability/`, `ArgumentExceptions/`, `StringInterpolation/`
 
+**Important constraints:**
+- Each `*Polyfill.cs` file must contain exactly **one top-level type** (the `Polyfill` partial class). Helper classes must be **nested** inside `Polyfill`, otherwise `ReadMethodsForFiles` in `BuildApiTest` will throw.
+- The filename of static polyfill files directly determines the `api_list.include.md` section header: `{TypeName}Polyfill.cs` → `#### {TypeName}`. For example, `FilePolyfill.cs` → `#### File`. Choose filenames to match the type being extended.
+- `//Link:` comments on public methods must use `?view=net-10.0` for learn.microsoft.com URLs (enforced by `LinkReader`).
+
 ### Test Projects
 
 - **Tests** — Main tests, verifies all APIs
@@ -75,11 +80,17 @@ Polyfill uses extensive `#if` directives. Key constants:
 3. Use `#if PolyPublic` / `public` / `#endif` pattern for type visibility
 4. Add test to `src/Tests/PolyfillTests_{TypeName}.cs`
 5. Add compilation usage to `src/Consume/Consume.cs`
-6. The Split files are generated — don't edit `src/Split/` manually
+6. Run `ApiBuilderTests` in **Debug** to regenerate Split files and `api_list.include.md`:
+   ```bash
+   dotnet run --project src/ApiBuilderTests/ApiBuilderTests.csproj --configuration Debug
+   ```
+   The `Splitter.Run` and `RunWithRoslyn` tests are `[Explicit]` in Release mode, so they only execute in Debug.
+
+**Test `#if` guard rules:** Tests should run on **all** target frameworks, not just the ones where the polyfill is active. On older frameworks the test exercises the polyfill; on newer frameworks it exercises the real BCL method. This validates that the polyfill behavior matches the native implementation. Do **not** use framework-excluding guards like `#if !NETx_0_OR_GREATER` in tests. Only use feature guards (`#if FeatureMemory`, `#if FeatureAsyncInterfaces`, etc.) when the test code requires types/APIs from those feature packages to compile.
 
 ## Technical Details
 
-- SDK: .NET 10.0 (`src/global.json`)
+- SDK: .NET 11.0 (`src/global.json`)
 - LangVersion: 14.0
 - Central Package Management: `src/Directory.Packages.props`
 - `TreatWarningsAsErrors` is enabled

@@ -545,6 +545,12 @@ class Consume
         var (key, value) = entry;
     }
 
+    void Enum_Methods()
+    {
+        var values = Enum.GetValuesAsUnderlyingType(typeof(DayOfWeek));
+        values = Enum.GetValuesAsUnderlyingType<DayOfWeek>();
+    }
+
     void EnumerationOptions_Methods()
     {
         var options = new EnumerationOptions
@@ -612,6 +618,15 @@ class Consume
     }
 #endif
 
+#if !NET11_0_OR_GREATER
+    void Console_Methods()
+    {
+        using var stdin = Console.OpenStandardInputHandle();
+        using var stdout = Console.OpenStandardOutputHandle();
+        using var stderr = Console.OpenStandardErrorHandle();
+    }
+#endif
+
     void File_Methods()
     {
         const string TestFilePath = "testfile.txt";
@@ -623,6 +638,14 @@ class Consume
 
         // Use the | bitwise OR operator to combine multiple file modes
         File.SetUnixFileMode(TestFilePath, UnixFileMode.OtherRead | UnixFileMode.OtherWrite);
+
+#if !NET11_0_OR_GREATER
+        using var nullHandle = File.OpenNullHandle();
+#endif
+
+        FileSystemInfo hardLink = File.CreateHardLink("hardlink.txt", TestFilePath);
+        var fileInfo = new FileInfo("hardlink2.txt");
+        fileInfo.CreateAsHardLink(TestFilePath);
     }
 
     void HashSet_Methods()
@@ -714,6 +737,19 @@ class Consume
         IList<string> ilist = new List<string>();
         ilist.AsReadOnly();
     }
+
+#if FeatureMemory && FeatureUnsafe
+    void Interlocked_Methods()
+    {
+        var intValue = 0xFF;
+        Interlocked.And(ref intValue, 0x0F);
+        Interlocked.Or(ref intValue, 0xF0);
+
+        var longValue = 0xFFL;
+        Interlocked.And(ref longValue, 0x0FL);
+        Interlocked.Or(ref longValue, 0xF0L);
+    }
+#endif
 
     void Int_Methods()
     {
@@ -808,6 +844,13 @@ class Consume
         var process = new Process();
         await process.WaitForExitAsync();
         process.Kill(true);
+    }
+
+    void ProcessStartInfo_Methods()
+    {
+        var info = new ProcessStartInfo("cmd.exe");
+        var argumentList = info.ArgumentList;
+        argumentList.Add("/c");
     }
 
     void Random_Methods()
@@ -1073,6 +1116,9 @@ class Consume
         target.Write(new StringBuilder());
         await target.FlushAsync(CancellationToken.None);
         await target.WriteAsync(new StringBuilder());
+        await target.WriteAsync("a", CancellationToken.None);
+        await target.WriteLineAsync(CancellationToken.None);
+        await target.WriteLineAsync("a", CancellationToken.None);
 #if FeatureMemory && FeatureValueTask
         target.WriteLine("a".AsSpan());
         target.Write("a".AsSpan());
@@ -1152,6 +1198,10 @@ class Consume
 #if FeatureCompression
     void ZipArchiveEntry_Methods(ZipArchive zip, ZipArchiveEntry entry)
     {
+        entry.Open(FileAccess.Read);
+#if FeatureValueTask
+        entry.OpenAsync(FileAccess.Read);
+#endif
         entry.OpenAsync();
         zip.CreateEntryFromFile("file.txt", "entry.txt");
         zip.CreateEntryFromFile("file.txt", "entry.txt", CompressionLevel.Optimal);

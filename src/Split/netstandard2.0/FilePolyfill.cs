@@ -4,10 +4,14 @@ namespace Polyfills;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 static partial class Polyfill
 {
 	extension(File)
@@ -280,4 +284,132 @@ static partial class Polyfill
 		}
 #endif
 	}
+	extension(File)
+	{
+		/// <summary>
+		/// Creates a hard link located in <paramref name="path"/> that refers to the same file content as <paramref name="pathToTarget"/>.
+		/// </summary>
+		/// <param name="path">The path where the hard link should be created.</param>
+		/// <param name="pathToTarget">The path of the hard link target.</param>
+		/// <returns>A <see cref="FileInfo"/> instance that wraps the newly created file.</returns>
+		public static FileSystemInfo CreateHardLink(string path, string pathToTarget)
+		{
+			var fullPath = Path.GetFullPath(path);
+			HardLinkHelper.ValidatePath(pathToTarget, nameof(pathToTarget));
+			HardLinkHelper.CreateHardLink(fullPath, Path.GetFullPath(pathToTarget));
+			return new FileInfo(path);
+		}
+	}
+#if !NET12_0_OR_GREATER
+	extension(File)
+	{
+		/// <summary>
+		/// Opens a handle to the operating system's null device.
+		/// </summary>
+		public static SafeFileHandle OpenNullHandle()
+		{
+			return NullDeviceHelper.Open();
+		}
+	}
+	[ExcludeFromCodeCoverage]
+	[DebuggerNonUserCode]
+#if PolyUseEmbeddedAttribute
+	[global::Microsoft.CodeAnalysis.EmbeddedAttribute]
+#endif
+	static class HardLinkHelper
+	{
+		internal static void ValidatePath(string path, string paramName)
+		{
+			if (path is null)
+			{
+				throw new ArgumentNullException(paramName);
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty file name is not legal.", paramName);
+			}
+		}
+		internal static void CreateHardLink(string path, string pathToTarget)
+		{
+#if FeatureRuntimeInformation
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#else
+			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+#endif
+			{
+				if (!CreateHardLinkW(path, pathToTarget, IntPtr.Zero))
+				{
+					throw new IOException(
+						$"Unable to create hard link '{path}' to '{pathToTarget}'.",
+						Marshal.GetHRForLastWin32Error());
+				}
+			}
+			else
+			{
+				if (link(pathToTarget, path) != 0)
+				{
+					throw new IOException(
+						$"Unable to create hard link '{path}' to '{pathToTarget}'.",
+						Marshal.GetHRForLastWin32Error());
+				}
+			}
+		}
+		[DllImport("kernel32.dll", EntryPoint = "CreateHardLinkW", CharSet = CharSet.Unicode, SetLastError = true)]
+		static extern bool CreateHardLinkW(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
+		[DllImport("libc", SetLastError = true)]
+		static extern int link(string oldpath, string newpath);
+	}
+	[ExcludeFromCodeCoverage]
+	[DebuggerNonUserCode]
+#if PolyUseEmbeddedAttribute
+	[global::Microsoft.CodeAnalysis.EmbeddedAttribute]
+#endif
+	static class NullDeviceHelper
+	{
+		internal static SafeFileHandle Open()
+		{
+#if FeatureRuntimeInformation
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#else
+			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+#endif
+			{
+				const uint GENERIC_READ = 0x80000000;
+				const uint GENERIC_WRITE = 0x40000000;
+				const uint FILE_SHARE_READ = 1;
+				const uint FILE_SHARE_WRITE = 2;
+				const uint OPEN_EXISTING = 3;
+				var handle = CreateFileW(
+					"NUL",
+					GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ | FILE_SHARE_WRITE,
+					IntPtr.Zero,
+					OPEN_EXISTING,
+					0,
+					IntPtr.Zero);
+				if (handle.IsInvalid)
+				{
+					throw new IOException("Unable to open null device.", Marshal.GetHRForLastWin32Error());
+				}
+				return handle;
+			}
+			else
+			{
+				var stream = new FileStream("/dev/null", FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+				var rawHandle = stream.SafeFileHandle.DangerousGetHandle();
+				stream.SafeFileHandle.SetHandleAsInvalid();
+				return new SafeFileHandle(rawHandle, ownsHandle: true);
+			}
+		}
+		[DllImport("kernel32.dll", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, SetLastError = true)]
+		static extern SafeFileHandle CreateFileW(
+			string lpFileName,
+			uint dwDesiredAccess,
+			uint dwShareMode,
+			IntPtr lpSecurityAttributes,
+			uint dwCreationDisposition,
+			uint dwFlagsAndAttributes,
+			IntPtr hTemplateFile);
+	}
+#endif
 }
