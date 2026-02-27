@@ -48,7 +48,6 @@ static partial class Polyfill
 			bool overwriteFiles,
 			CancellationToken cancellationToken = default) =>
 			Task.Run(() => ExtractToDirectoryPolyfill(sourceArchiveFileName, destinationDirectoryName, entryNameEncoding, overwriteFiles), cancellationToken);
-		// Helper method to handle overwriteFiles polyfill for pre-.NET 8.0
 		static void ExtractToDirectoryPolyfill(
 			string sourceArchiveFile,
 			string destinationDirectory,
@@ -64,6 +63,31 @@ static partial class Polyfill
 		{
 			ZipFile.ExtractToDirectory(sourceArchiveFile, destinationDirectory, encoding, overwrite);
 		}
+		/// <summary>
+		/// Asynchronously opens a ZipArchive on the specified archiveFileName in the specified ZipArchiveMode mode.
+		/// </summary>
+		public static Task<ZipArchive> OpenAsync(
+			string archiveFileName,
+			ZipArchiveMode mode,
+			CancellationToken cancellationToken = default) =>
+			Task.Run(() => ZipFile.Open(archiveFileName, mode), cancellationToken);
+		/// <summary>
+		/// Asynchronously opens a ZipArchive on the specified archiveFileName in the specified ZipArchiveMode mode.
+		/// </summary>
+		public static Task<ZipArchive> OpenAsync(
+			string archiveFileName,
+			ZipArchiveMode mode,
+			Encoding? entryNameEncoding,
+			CancellationToken cancellationToken = default) =>
+			Task.Run(() => ZipFile.Open(archiveFileName, mode, entryNameEncoding), cancellationToken);
+		/// <summary>
+		/// Asynchronously opens a ZipArchive on the specified path for reading.
+		/// The specified file is opened with FileMode.Open.
+		/// </summary>
+		public static Task<ZipArchive> OpenReadAsync(
+			string archiveFileName,
+			CancellationToken cancellationToken = default) =>
+			Task.Run(() => ZipFile.OpenRead(archiveFileName), cancellationToken);
 		/// <summary>
 		/// Asynchronously creates a zip archive that contains the files and directories from the specified directory.
 		/// </summary>

@@ -1,5 +1,4 @@
-#if !NET9_0_OR_GREATER && (NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER) && FeatureAsyncInterfaces
-
+#if !NET9_0_OR_GREATER && FeatureAsyncInterfaces
 namespace Polyfills;
 
 using System;
@@ -15,7 +14,7 @@ static partial class Polyfill
         /// <summary>
         /// Creates an async-enumerable that yields completed tasks from the provided collection as they complete.
         /// </summary>
-        //Link: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.wheneach?view=net-11.0
+        //Link: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.wheneach?view=net-11.0#system-threading-tasks-task-wheneach(system-collections-generic-ienumerable((system-threading-tasks-task)))
         public static async IAsyncEnumerable<Task> WhenEach(
             IEnumerable<Task> tasks,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -44,7 +43,7 @@ static partial class Polyfill
         /// <summary>
         /// Creates an async-enumerable that yields completed tasks from the provided collection as they complete.
         /// </summary>
-        //Link: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.wheneach?view=net-11.0
+        //Link: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.wheneach?view=net-11.0#system-threading-tasks-task-wheneach-1(system-collections-generic-ienumerable((system-threading-tasks-task((-0)))))
         public static async IAsyncEnumerable<Task<TResult>> WhenEach<TResult>(
             IEnumerable<Task<TResult>> tasks,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)

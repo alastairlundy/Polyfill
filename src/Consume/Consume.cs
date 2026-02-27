@@ -1068,7 +1068,7 @@ class Consume
         new Task<int>(func).WaitAsync(TimeSpan.Zero, CancellationToken.None);
     }
 
-#if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+#if FeatureAsyncInterfaces
     async Task Task_WhenEach_Methods()
     {
         var tasks = new[] { Task.CompletedTask, Task.CompletedTask };
@@ -1180,6 +1180,7 @@ class Consume
         document.SaveAsync(new XmlTextWriter(null!), CancellationToken.None);
         document.SaveAsync(new StringWriter(), SaveOptions.None, CancellationToken.None);
         document.SaveAsync(new MemoryStream(), SaveOptions.None, CancellationToken.None);
+        document.WriteToAsync(XmlWriter.Create(TextWriter.Null), CancellationToken.None);
         await XDocument.LoadAsync((Stream) null!, LoadOptions.None, CancellationToken.None);
         await XDocument.LoadAsync((TextReader) null!, LoadOptions.None, CancellationToken.None);
         await XDocument.LoadAsync((XmlReader) null!, LoadOptions.None, CancellationToken.None);
@@ -1190,9 +1191,26 @@ class Consume
         element.SaveAsync(new XmlTextWriter(null!), CancellationToken.None);
         element.SaveAsync(new StringWriter(), SaveOptions.None, CancellationToken.None);
         element.SaveAsync(new MemoryStream(), SaveOptions.None, CancellationToken.None);
+        element.WriteToAsync(XmlWriter.Create(TextWriter.Null), CancellationToken.None);
         await XElement.LoadAsync((Stream) null!, LoadOptions.None, CancellationToken.None);
         await XElement.LoadAsync((TextReader) null!, LoadOptions.None, CancellationToken.None);
         await XElement.LoadAsync((XmlReader) null!, LoadOptions.None, CancellationToken.None);
+    }
+
+    async Task XNode_Methods(XNode node, XmlReader xmlReader)
+    {
+        node.WriteToAsync(XmlWriter.Create(TextWriter.Null), CancellationToken.None);
+        await XNode.ReadFromAsync(xmlReader, CancellationToken.None);
+    }
+
+    void XComment_Methods(XComment comment)
+    {
+        comment.WriteToAsync(XmlWriter.Create(TextWriter.Null), CancellationToken.None);
+    }
+
+    void XCData_Methods(XCData cdata)
+    {
+        cdata.WriteToAsync(XmlWriter.Create(TextWriter.Null), CancellationToken.None);
     }
 
 #if FeatureCompression
@@ -1230,6 +1248,14 @@ class Consume
         await ZipFile.CreateFromDirectoryAsync("source", "archive.zip", CompressionLevel.Optimal, includeBaseDirectory: false, CancellationToken.None);
         await ZipFile.CreateFromDirectoryAsync("source", "archive.zip", CompressionLevel.Optimal, includeBaseDirectory: false, Encoding.UTF8);
         await ZipFile.CreateFromDirectoryAsync("source", "archive.zip", CompressionLevel.Optimal, includeBaseDirectory: false, Encoding.UTF8, CancellationToken.None);
+
+        await ZipFile.OpenAsync("archive.zip", ZipArchiveMode.Read);
+        await ZipFile.OpenAsync("archive.zip", ZipArchiveMode.Read, CancellationToken.None);
+        await ZipFile.OpenAsync("archive.zip", ZipArchiveMode.Read, Encoding.UTF8);
+        await ZipFile.OpenAsync("archive.zip", ZipArchiveMode.Read, Encoding.UTF8, CancellationToken.None);
+
+        await ZipFile.OpenReadAsync("archive.zip");
+        await ZipFile.OpenReadAsync("archive.zip", CancellationToken.None);
     }
 #endif
 }
